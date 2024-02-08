@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.1"
+__version__="0.0.2"
 
 import argparse, json, os.path, urllib.request
 from tqdm import tqdm
@@ -18,7 +18,7 @@ def clone_file(url):
         with urllib.request.urlopen(url) as response, \
              open(filename, 'wb') as file, \
              tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024, desc=f'Downloading {filename}') as pbar:
-            chunk_size = 1024  # 1 KB
+            chunk_size = 1024
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk:
