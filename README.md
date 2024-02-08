@@ -1,6 +1,7 @@
 ### GGUF core
 
 [<img src="https://raw.githubusercontent.com/calcuis/gguf-connector/master/gguf.gif" width="128" height="128">](https://github.com/calcuis/gguf-connector)
+[![Static Badge](https://img.shields.io/badge/core-0.0.3-orange?logo=github)](https://github.com/calcuis/gguf-core/releases)
 
 This package is a GGUF (GPT-Generated Unified Format) file caller.
 #### install the caller via pip/pip3 (once only):
@@ -42,7 +43,7 @@ For general purpose
 ```
 gguf clone https://huggingface.co/calcuis/chat/resolve/main/chat.gguf
 ```
-For coding
+For coding assistance
 [code.gguf] (size: around 3GB or more)
 ```
 gguf clone https://huggingface.co/calcuis/chat/resolve/main/code.gguf
