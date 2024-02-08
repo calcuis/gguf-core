@@ -21,6 +21,10 @@ gguf -h
 ```
 gguf -v
 ```
+#### cli connector
+```
+gguf c
+```
 #### gui connector
 ```
 gguf g
