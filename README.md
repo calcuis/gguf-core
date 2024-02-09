@@ -1,6 +1,6 @@
 ### GGUF core
 
-[<img src="https://raw.githubusercontent.com/calcuis/gguf-connector/master/gguf.gif" width="128" height="128">](https://github.com/calcuis/gguf-connector)
+[<img src="https://raw.githubusercontent.com/calcuis/gguf-connector/master/gguf.gif" width="128" height="128">](https://github.com/calcuis/gguf-core)
 [![Static Badge](https://img.shields.io/badge/core-0.0.3-orange?logo=github)](https://github.com/calcuis/gguf-core/releases)
 
 This package is a GGUF (GPT-Generated Unified Format) file caller.
