@@ -1,6 +1,6 @@
 ### GGUF core
 [<img src="https://raw.githubusercontent.com/calcuis/chatgpt-model-selector/master/callgg.gif" width="128" height="128">](https://github.com/calcuis/gguf-core)
-[![Static Badge](https://img.shields.io/badge/core-0.0.3-orange?logo=github)](https://github.com/calcuis/gguf-core/releases)
+[![Static Badge](https://img.shields.io/badge/core-0.0.4-orange?logo=github)](https://github.com/calcuis/gguf-core/releases)
 
 This package is a GGUF (GPT-Generated Unified Format) file caller.
 #### install the caller via pip/pip3 (once only):
