@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.3"
+__version__="0.0.4"
 
 import argparse, json, os.path, urllib.request
 from tqdm import tqdm
@@ -55,7 +55,7 @@ def handle_user_input(data):
             print("Invalid input. Please enter a number.")
 
 def __init__():
-    parser = argparse.ArgumentParser(description="cgg will execute different functions based on command-line arguments")
+    parser = argparse.ArgumentParser(description="gguf will execute different functions based on command-line arguments")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
 
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help="choose a subcommand:")
