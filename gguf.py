@@ -1,10 +1,61 @@
 # !/usr/bin/env python3
 
-__version__="0.0.5"
+__version__="0.0.6"
 
 import argparse, json, os.path, urllib.request
 from tqdm import tqdm
 from tkinter import *
+
+def pdf_handler(llm):
+    import os
+    pdf_files = [file for file in os.listdir() if file.endswith('.pdf')]
+
+    def join_text(input_text):
+        # Remove newline characters and join lines into one
+        joined_text = ' '.join(input_text.splitlines())
+        return joined_text
+
+    if pdf_files:
+        print("PDF file(s) available. Select which one to use:")
+        
+        for index, file_name in enumerate(pdf_files, start=1):
+            print(f"{index}. {file_name}")
+
+        choice = input(f"Enter your choice (1 to {len(pdf_files)}): ")
+        
+        try:
+            choice_index=int(choice)-1
+            selected_file=pdf_files[choice_index]
+            print(f"PDF file: {selected_file} is selected!")
+
+            from pypdf import PdfReader
+            reader = PdfReader(selected_file)
+
+            text=""
+            number_of_pages = len(reader.pages)
+            for i in range(number_of_pages):
+                page = reader.pages[i]
+                text += page.extract_text()
+            # # print(text)
+            
+            # Join text
+            output_text = join_text(text)
+            inject = f"analyze the content below: "+output_text
+
+            print(f"\nPDF cotent extracted as below:\n\n"+text)
+            input("---Enter to analyze the PDF content above---")
+
+            print("Processing...")
+            # output = llm("Q: "+inject, max_tokens=4096, echo=True)
+            output = llm("Q: "+inject, max_tokens=32768, echo=True)
+            answer = output['choices'][0]['text']
+            print(answer+"\n")
+
+        except (ValueError, IndexError):
+            print("Invalid choice. Please enter a valid number.")
+    else:
+        print("No PDF files are available in the current directory.")
+        input("--- Press ENTER To Exit ---")
 
 def get_file_size(url):
     with urllib.request.urlopen(url) as response:
@@ -15,10 +66,12 @@ def clone_file(url):
     try:
         file_size = get_file_size(url)
         filename = os.path.basename(url)
+        # Download the file with progress
         with urllib.request.urlopen(url) as response, \
              open(filename, 'wb') as file, \
              tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024, desc=f'Downloading {filename}') as pbar:
-            chunk_size = 1024
+            # Download in chunks and update the progress bar
+            chunk_size = 1024  # 1 KB
             while True:
                 chunk = response.read(chunk_size)
                 if not chunk:
@@ -30,8 +83,10 @@ def clone_file(url):
         print(f"Error: {e}")
 
 def read_json_file(file_path):
-    response = urllib.request.urlopen(file_path)
-    data = json.loads(response.read())
+    # response = urllib.request.urlopen(file_path)
+    # data = json.loads(response.read())
+    with open(file_path, 'r') as file:
+        data = json.load(file)
     return data
 
 def extract_names(data):
@@ -59,21 +114,62 @@ def __init__():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
 
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help="choose a subcommand:")
+    # Subparser for 'clone [URL]' subcommand
     clone_parser = subparsers.add_parser('clone', help='download a GGUF file/model from URL')
     clone_parser.add_argument('url', type=str, help='URL to download from (i.e., gguf clone [url])')
     subparsers.add_parser('c', help='CLI connector')
     subparsers.add_parser('g', help='GUI connector')
+    subparsers.add_parser('p', help='PDF analyzor (beta)')
     subparsers.add_parser('s', help='sample GGUF list (ready)')
     args = parser.parse_args()
 
     if args.subcommand == 'clone':
         clone_file(args.url)
     elif args.subcommand == 's':
-        file_path = "https://raw.githubusercontent.com/calcuis/gguf-connector/main/src/gguf_connector/data.json"
+        import os
+        # file_path = "https://raw.githubusercontent.com/calcuis/gguf-connector/main/src/gguf_connector/data.json"
+        file_path = os.path.join(os.path.dirname(__file__), 'data.json')
         json_data = read_json_file(file_path)
         print("Please select a GGUF file to download:")
         extract_names(json_data)
         handle_user_input(json_data)
+    elif args.subcommand == 'p':
+        import os
+        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
+
+        if gguf_files:
+            print("GGUF file(s) available. Select which one to use:")
+            
+            for index, file_name in enumerate(gguf_files, start=1):
+                print(f"{index}. {file_name}")
+
+            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+            
+            try:
+                choice_index=int(choice)-1
+                selected_file=gguf_files[choice_index]
+                print(f"Model file: {selected_file} is selected!")
+                ModelPath=selected_file
+
+                from llama_cpp import Llama
+                llm = Llama(model_path=ModelPath)
+
+                while True:
+                    ask = input("---Enter to select a PDF file (Q for quit)---")
+
+                    if ask == "q" or ask == "Q":
+                        break
+                    
+                    pdf_handler(llm)
+
+            except (ValueError, IndexError):
+                print("Invalid choice. Please enter a valid number.")
+        else:
+            print("No GGUF files are available in the current directory.")
+            input("--- Press ENTER To Exit ---")
+
+        print("Goodbye!")
+
     elif args.subcommand == 'c':
         import os
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
@@ -114,7 +210,6 @@ def __init__():
         print("Goodbye!")
     elif args.subcommand == 'g':
         import os
-
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
 
         if gguf_files:
@@ -141,6 +236,9 @@ def __init__():
                 root.columnconfigure([0, 1, 2], minsize=150)
                 root.rowconfigure(0, weight=2)
                 root.rowconfigure(1, weight=1)
+                
+                icon = PhotoImage(file = os.path.join(os.path.dirname(__file__), "logo.png"))
+                root.iconphoto(False, icon)
 
                 i = Entry()
                 o = st.ScrolledText()
