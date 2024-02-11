@@ -39,7 +39,7 @@ You can either use the clone feature above or opt a sample GGUF straight from th
 gguf s
 ```
 #### pdf analyzor (beta)
-You can now load your PDF file(s) straight for generating digested summary; try it out by:
+You can now load your PDF file(s) straight into the model for generating digested summary; try it out by:
 ```
 gguf p
 ```
