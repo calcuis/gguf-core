@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.6"
+__version__="0.0.7"
 
 import argparse, json, os.path, urllib.request
 from tqdm import tqdm
@@ -151,7 +151,7 @@ def __init__():
                 print(f"Model file: {selected_file} is selected!")
                 ModelPath=selected_file
 
-                from llama_cpp import Llama
+                from llama_core import Llama
                 llm = Llama(model_path=ModelPath)
 
                 while True:
