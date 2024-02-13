@@ -44,7 +44,7 @@ You can now load your PDF file(s) straight into the model for generating digeste
 gguf p
 ```
 #### webpage (alpha)
-Paste it to browser instead of cmd console.
 ```
 https://gguf.us
 ```
+Paste it (gguf.us) to browser instead of cmd console.
