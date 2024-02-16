@@ -20,23 +20,27 @@ gguf -h
 ```
 gguf -v
 ```
-GGUF file(s) in the same directory will automatically be detected by the caller.
 #### cli connector
+with command-line interface
 ```
 gguf c
 ```
 #### gui connector
+with graphical user interface
 ```
 gguf g
 ```
 #### interface selector
+selection menu for connector interface(s) above
 ```
 gguf i
 ```
 #### metadata reader
+read model metadata for detail(s)
 ```
 gguf r
 ```
+GGUF file(s) in the same directory will automatically be detected by the caller.
 #### clone feature
 ```
 gguf clone [url]
@@ -55,4 +59,4 @@ gguf p
 ```
 https://gguf.us
 ```
-Paste it (gguf.us) to browser instead of cmd console.
+paste it (gguf.us) to browser instead of cmd console
