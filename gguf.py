@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.10"
+__version__="0.0.11"
 
 import argparse, json, os.path, urllib.request
 from tqdm import tqdm
@@ -83,10 +83,10 @@ def clone_file(url):
         print(f"Error: {e}")
 
 def read_json_file(file_path):
-    # response = urllib.request.urlopen(file_path)
-    # data = json.loads(response.read())
-    with open(file_path, 'r') as file:
-        data = json.load(file)
+    response = urllib.request.urlopen(file_path)
+    data = json.loads(response.read())
+    # with open(file_path, 'r') as file:
+    #     data = json.load(file)
     return data
 
 def extract_names(data):
@@ -117,22 +117,29 @@ def __init__():
     # Subparser for 'clone [URL]' subcommand
     clone_parser = subparsers.add_parser('clone', help='download a GGUF file/model from URL')
     clone_parser.add_argument('url', type=str, help='URL to download from (i.e., gguf clone [url])')
+    # Subparser for subcommands
     subparsers.add_parser('c', help='CLI connector')
     subparsers.add_parser('g', help='GUI connector')
+    subparsers.add_parser('i', help='interface selector')
     subparsers.add_parser('p', help='PDF analyzor (beta)')
-    subparsers.add_parser('s', help='sample GGUF list (ready)')
+    subparsers.add_parser('r', help='GGUF metadata reader')
+    subparsers.add_parser('s', help='sample GGUF list (download ready)')
     args = parser.parse_args()
 
     if args.subcommand == 'clone':
         clone_file(args.url)
     elif args.subcommand == 's':
         import os
-        # file_path = "https://raw.githubusercontent.com/calcuis/gguf-connector/main/src/gguf_connector/data.json"
-        file_path = os.path.join(os.path.dirname(__file__), 'data.json')
+        file_path = "https://raw.githubusercontent.com/calcuis/gguf-connector/main/src/gguf_connector/data.json"
+        # file_path = os.path.join(os.path.dirname(__file__), 'data.json')
         json_data = read_json_file(file_path)
         print("Please select a GGUF file to download:")
         extract_names(json_data)
         handle_user_input(json_data)
+    elif args.subcommand == 'r':
+        from llama_core import read
+    elif args.subcommand == 'i':
+        from llama_core import menu
     elif args.subcommand == 'p':
         import os
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
@@ -152,6 +159,7 @@ def __init__():
                 ModelPath=selected_file
 
                 print("Processing...")
+
                 from llama_core import Llama
                 llm = Llama(model_path=ModelPath)
 
@@ -172,97 +180,6 @@ def __init__():
         print("Goodbye!")
 
     elif args.subcommand == 'c':
-        import os
-        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
-
-        if gguf_files:
-            print("GGUF file(s) available. Select which one to use:")
-            
-            for index, file_name in enumerate(gguf_files, start=1):
-                print(f"{index}. {file_name}")
-
-            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
-            
-            try:
-                choice_index=int(choice)-1
-                selected_file=gguf_files[choice_index]
-                print(f"Model file: {selected_file} is selected!")
-                ModelPath=selected_file
-
-                from llama_core import Llama
-                llm = Llama(model_path=ModelPath)
-
-                while True:
-                    ask = input("Enter a Question (Q for quit): ")
-
-                    if ask == "q" or ask == "Q":
-                        break
-
-                    output = llm("Q: "+ask, max_tokens=2048, echo=True)
-                    answer = output['choices'][0]['text']
-                    print(answer+"\n")
-
-            except (ValueError, IndexError):
-                print("Invalid choice. Please enter a valid number.")
-        else:
-            print("No GGUF files are available in the current directory.")
-            input("--- Press ENTER To Exit ---")
-
-        print("Goodbye!")
+        from llama_core import cli
     elif args.subcommand == 'g':
-        import os
-        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
-
-        if gguf_files:
-            print("GGUF file(s) available. Select which one to use:")
-            
-            for index, file_name in enumerate(gguf_files, start=1):
-                print(f"{index}. {file_name}")
-
-            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
-            
-            try:
-                choice_index=int(choice)-1
-                selected_file=gguf_files[choice_index]
-                print(f"Model file: {selected_file} is selected!")
-                ModelPath=selected_file
-
-                from llama_core import Llama
-                llm = Llama(model_path=ModelPath)
-
-                import tkinter.scrolledtext as st
-
-                root = Tk()
-                root.title("GGuF")
-                root.columnconfigure([0, 1, 2], minsize=150)
-                root.rowconfigure(0, weight=2)
-                root.rowconfigure(1, weight=1)
-                
-                icon = PhotoImage(file = os.path.join(os.path.dirname(__file__), "logo.png"))
-                root.iconphoto(False, icon)
-
-                i = Entry()
-                o = st.ScrolledText()
-
-                def submit(i):
-                    root.title("Processing...")
-
-                    output = llm("Q: "+str(i.get()), max_tokens=2048, echo=True)
-                    answer = output['choices'][0]['text']
-                    print(answer)
-                    o.insert(INSERT, answer+"\n\n")
-
-                    i.delete(0, END)
-                    root.title("GGuF")
-
-                btn = Button(text = "Submit", command = lambda: submit(i))
-                i.grid(row=1, columnspan=2, sticky="nsew")
-                btn.grid(row=1, column=2, sticky="nsew")
-                o.grid(row=0, columnspan=3, sticky="nsew")
-                root.mainloop()
-
-            except (ValueError, IndexError):
-                print("Invalid choice. Please enter a valid number.")
-        else:
-            print("No GGUF files are available in the current directory.")
-            input("--- Press ENTER To Exit ---")
+        from llama_core import gui
