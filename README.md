@@ -20,6 +20,7 @@ gguf -h
 ```
 gguf -v
 ```
+GGUF file(s) in the same directory will automatically be detected by the caller.
 #### cli connector
 ```
 gguf c
@@ -28,7 +29,14 @@ gguf c
 ```
 gguf g
 ```
-GGUF file(s) in the same directory will automatically be detected by the caller.
+#### interface selector
+```
+gguf i
+```
+#### metadata reader
+```
+gguf r
+```
 #### clone feature
 ```
 gguf clone [url]
