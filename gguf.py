@@ -1,9 +1,8 @@
 # !/usr/bin/env python3
 
-__version__="0.0.13"
+__version__="0.0.14"
 
 import argparse, json, os.path, urllib.request
-from tqdm import tqdm
 from tkinter import *
 
 def pdf_handler(llm):
@@ -28,8 +27,9 @@ def pdf_handler(llm):
             selected_file=pdf_files[choice_index]
             print(f"PDF file: {selected_file} is selected!")
 
-            # from pypdf import PdfReader
-            from llama_core.pdf import PdfReader
+            # from pypdf import PdfReader (pypdf dropped)
+            # from llama_core.rpdf import PdfReader # generic module adopted
+            from llama_core.pdf import PdfReader # lama_core 0.1.1 rpdf => pdf
             reader = PdfReader(selected_file)
 
             text=""
@@ -57,6 +57,8 @@ def pdf_handler(llm):
     else:
         print("No PDF files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
+        
+from llama_core.rich.progress import Progress
 
 def get_file_size(url):
     with urllib.request.urlopen(url) as response:
@@ -67,18 +69,18 @@ def clone_file(url):
     try:
         file_size = get_file_size(url)
         filename = os.path.basename(url)
-        # Download the file with progress
-        with urllib.request.urlopen(url) as response, \
-             open(filename, 'wb') as file, \
-             tqdm(total=file_size, unit='B', unit_scale=True, unit_divisor=1024, desc=f'Downloading {filename}') as pbar:
-            # Download in chunks and update the progress bar
-            chunk_size = 1024  # 1 KB
-            while True:
-                chunk = response.read(chunk_size)
-                if not chunk:
-                    break
-                file.write(chunk)
-                pbar.update(len(chunk))
+        with Progress() as progress:
+            task = progress.add_task(f"Downloading {filename}", total=file_size)
+            with urllib.request.urlopen(url) as response, open(filename, 'wb') as file:
+                chunk_size = 1024
+                downloaded = 0
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    file.write(chunk)
+                    downloaded += len(chunk)
+                    progress.update(task, completed=downloaded)
         print(f"File cloned successfully and saved as '{filename}' in the current directory.")
     except Exception as e:
         print(f"Error: {e}")
@@ -113,7 +115,7 @@ def handle_user_input(data):
 def __init__():
     parser = argparse.ArgumentParser(description="gguf will execute different functions based on command-line arguments")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
-
+    # Subparser session
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help="choose a subcommand:")
     # Subparser for 'clone [URL]' subcommand
     clone_parser = subparsers.add_parser('clone', help='download a GGUF file/model from URL')
