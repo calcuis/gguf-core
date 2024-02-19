@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.12"
+__version__="0.0.13"
 
 import argparse, json, os.path, urllib.request
 from tqdm import tqdm
@@ -29,7 +29,7 @@ def pdf_handler(llm):
             print(f"PDF file: {selected_file} is selected!")
 
             # from pypdf import PdfReader
-            from llama_core.rpdf import PdfReader
+            from llama_core.pdf import PdfReader
             reader = PdfReader(selected_file)
 
             text=""
