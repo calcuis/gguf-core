@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.16"
+__version__="0.0.17"
 
 import argparse, json, os.path, urllib.request
 from tkinter import *
@@ -84,7 +84,7 @@ def clone_file(url):
                         break
                     file.write(chunk)
                     downloaded += len(chunk)
-                    progress.update(task, completed=downloaded, description=f"Downloading {filename} [{format_size(downloaded)} / {format_size(file_size)}]")
+                    progress.update(task, completed=downloaded, description=f"Downloading {filename} [green][{format_size(downloaded)} / {format_size(file_size)}]")
         
         print(f"File cloned successfully and saved as '{filename}' in the current directory.")
     except Exception as e:
@@ -174,7 +174,7 @@ def __init__():
                 while True:
                     ask = input("---Enter to select a PDF file (Q for quit)---")
 
-                    if ask == "q" or ask == "Q":
+                    if ask.lower() == "q":
                         break
                     
                     pdf_handler(llm)
