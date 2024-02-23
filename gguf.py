@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.15"
+__version__="0.0.16"
 
 import argparse, json, os.path, urllib.request
 from tkinter import *
@@ -78,7 +78,6 @@ def clone_file(url):
             with urllib.request.urlopen(url) as response, open(filename, 'wb') as file:
                 chunk_size = 1024
                 downloaded = 0
-                start_downloaded = 0
                 while True:
                     chunk = response.read(chunk_size)
                     if not chunk:
@@ -86,9 +85,6 @@ def clone_file(url):
                     file.write(chunk)
                     downloaded += len(chunk)
                     progress.update(task, completed=downloaded, description=f"Downloading {filename} [{format_size(downloaded)} / {format_size(file_size)}]")
-                    
-                    if downloaded - start_downloaded > 1024 * 1024:
-                        start_downloaded = downloaded
         
         print(f"File cloned successfully and saved as '{filename}' in the current directory.")
     except Exception as e:
