@@ -58,7 +58,7 @@ def pdf_handler(llm):
         print("No PDF files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
         
-from llama_core.rich.progress import Progress
+from llama_core.rich.progress import Progress # generic module adopted (lama_core 0.1.2)
 
 def get_file_size(url):
     with urllib.request.urlopen(url) as response:
@@ -72,7 +72,6 @@ def clone_file(url):
     try:
         file_size = get_file_size(url)
         filename = os.path.basename(url)
-        
         with Progress() as progress:
             task = progress.add_task(f"Downloading {filename}", total=file_size)
             with urllib.request.urlopen(url) as response, open(filename, 'wb') as file:
@@ -85,7 +84,6 @@ def clone_file(url):
                     file.write(chunk)
                     downloaded += len(chunk)
                     progress.update(task, completed=downloaded, description=f"Downloading {filename} [green][{format_size(downloaded)} / {format_size(file_size)}]")
-        
         print(f"File cloned successfully and saved as '{filename}' in the current directory.")
     except Exception as e:
         print(f"Error: {e}")
@@ -173,10 +171,8 @@ def __init__():
 
                 while True:
                     ask = input("---Enter to select a PDF file (Q for quit)---")
-
                     if ask.lower() == "q":
                         break
-                    
                     pdf_handler(llm)
 
             except (ValueError, IndexError):
