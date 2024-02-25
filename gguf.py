@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.17"
+__version__="0.0.18"
 
 import argparse, json, os.path, urllib.request
 from tkinter import *
