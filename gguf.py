@@ -23,10 +23,9 @@ def pdf_handler(llm):
             choice_index=int(choice)-1
             selected_file=pdf_files[choice_index]
             print(f"PDF file: {selected_file} is selected!")
-
             # from pypdf import PdfReader (pypdf dropped)
             # from llama_core.rpdf import PdfReader # generic module adopted
-            from llama_core.pdf import PdfReader # lama_core 0.1.1 rpdf => pdf
+            from llama_core.pdf import PdfReader # rpdf => pdf (lama_core >=0.1.1)
             reader = PdfReader(selected_file)
             text=""
             number_of_pages = len(reader.pages)
@@ -34,17 +33,12 @@ def pdf_handler(llm):
                 page = reader.pages[i]
                 text += page.extract_text()
             # # print(text)
-                
             # Join text
             output_text = join_text(text)
             inject = f"analyze the content below: "+output_text
 
             print(f"\nPDF cotent extracted as below:\n\n"+text)
             input("---Enter to analyze the PDF content above---")
-            
-            # print("Processing...")
-            # ###########################################
-            # # # output = llm("Q: "+inject, max_tokens=4096, echo=True)
             # ###########################################
             from llama_core.rich.progress import Progress
             with Progress(transient=True) as progress:
@@ -53,15 +47,13 @@ def pdf_handler(llm):
                 answer = output['choices'][0]['text']
                 print(answer+"\n")
             # ###########################################
-
         except (ValueError, IndexError):
             print("Invalid choice. Please enter a valid number.")
     else:
         print("No PDF files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################
 # from rich.progress import Progress (rich dropped)
-from llama_core.rich.progress import Progress # generic module adopted (lama_core 0.1.2)
+from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
 
 def get_file_size(url):
     with urllib.request.urlopen(url) as response:
@@ -71,7 +63,7 @@ def get_file_size(url):
 def format_size(size_bytes):
     return f"{size_bytes / (1024 * 1024):.2f} MB"
 
-def clone_file(url):
+def clone_file(url): # no more invalid certificate issues; certifi required (llama_core >=0.1.9)
     try:
         file_size = get_file_size(url)
         filename = os.path.basename(url)
@@ -91,7 +83,6 @@ def clone_file(url):
     except Exception as e:
         print(f"Error: {e}")
 # ###########################################################################
-
 def read_json_file(file_path):
     response = urllib.request.urlopen(file_path)
     data = json.loads(response.read())
