@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.26"
+__version__="0.0.27"
 
 import argparse, json, os.path, urllib.request
 from tkinter import *
@@ -169,7 +169,6 @@ def __init__():
             print("No GGUF files are available in the current directory.")
             input("--- Press ENTER To Exit ---")
         print("Goodbye!")
-
     elif args.subcommand == 'g':
         from llama_core import gui
     # elif args.subcommand == 'c':
