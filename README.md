@@ -40,8 +40,9 @@ read model metadata for detail(s)
 ```
 gguf r
 ```
-GGUF file(s) in the same directory will automatically be detected by the caller.
+GGUF file(s) in the current directory will automatically be detected by the caller.
 #### clone feature
+get GGUF from URL; clone/download it to the current directory
 ```
 gguf clone [url]
 ```
