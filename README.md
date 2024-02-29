@@ -41,13 +41,13 @@ read model metadata for detail(s)
 gguf r
 ```
 GGUF file(s) in the current directory will automatically be detected by the caller.
-#### clone feature
+#### get feature
 get GGUF from URL; clone/download it to the current directory
 ```
-gguf clone [url]
+gguf get [url]
 ```
 #### sample model list
-You can either use the clone feature above or opt a sample GGUF straight from the sample list by:
+You can either use the get feature above or opt a sample GGUF straight from the sample list by:
 ```
 gguf s
 ```
