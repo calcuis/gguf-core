@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.27"
+__version__="0.0.28"
 
 import argparse, json, os.path, urllib.request
 from tkinter import *
@@ -115,9 +115,9 @@ def __init__():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     # Subparser session
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help="choose a subcommand:")
-    # Subparser for 'clone [URL]' subcommand
-    clone_parser = subparsers.add_parser('clone', help='download a GGUF file/model from URL')
-    clone_parser.add_argument('url', type=str, help='URL to download from (i.e., gguf clone [url])')
+    # Subparser for 'get [URL]' subcommand
+    clone_parser = subparsers.add_parser('get', help='download a GGUF file/model from URL')
+    clone_parser.add_argument('url', type=str, help='URL to download/clone from (i.e., gguf get [url])')
     # Subparser for subcommands
     subparsers.add_parser('c', help='CLI connector')
     subparsers.add_parser('g', help='GUI connector')
@@ -127,7 +127,7 @@ def __init__():
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
     args = parser.parse_args()
 
-    if args.subcommand == 'clone':
+    if args.subcommand == 'get':
         clone_file(args.url)
     elif args.subcommand == 's':
         import os
