@@ -1,18 +1,16 @@
 # !/usr/bin/env python3
 
-__version__="0.0.30"
+__version__="0.0.31"
 
 import argparse, json, os.path, urllib.request
 
 def pdf_handler(llm):
     import os
     pdf_files = [file for file in os.listdir() if file.endswith('.pdf')]
-
     def join_text(input_text):
         # Remove newline characters and join lines into one
         joined_text = ' '.join(input_text.splitlines())
         return joined_text
-    
     if pdf_files:
         print("PDF file(s) available. Select which one to use:")
         for index, file_name in enumerate(pdf_files, start=1):
@@ -35,8 +33,10 @@ def pdf_handler(llm):
             # Join text
             output_text = join_text(text)
             inject = f"analyze the content below: "+output_text
-
-            print(f"\nPDF cotent extracted as below:\n\n"+text)
+            from llama_core.rich.console import Console
+            console = Console()
+            console.print(f"\n[green]PDF cotent extracted as below:\n\n[yellow]"+text)
+            # print(f"\nPDF cotent extracted as below:\n\n"+text)
             input("---Enter to analyze the PDF content above---")
             # ###########################################
             from llama_core.rich.progress import Progress
