@@ -1,9 +1,8 @@
 # !/usr/bin/env python3
 
-__version__="0.0.29"
+__version__="0.0.30"
 
 import argparse, json, os.path, urllib.request
-from tkinter import *
 
 def pdf_handler(llm):
     import os
@@ -110,6 +109,8 @@ def handle_user_input(data):
         except ValueError:
             print("Invalid input. Please enter a number.")
 
+from tkinter import *
+
 def __init__():
     parser = argparse.ArgumentParser(description="gguf will execute different functions based on command-line arguments")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
@@ -126,7 +127,6 @@ def __init__():
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
     args = parser.parse_args()
-
     if args.subcommand == 'get':
         clone_file(args.url)
     elif args.subcommand == 's':
