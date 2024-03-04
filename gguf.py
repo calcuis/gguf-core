@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.31"
+__version__="0.0.32"
 
 import argparse, json, os.path, urllib.request
 
@@ -126,6 +126,7 @@ def __init__():
     subparsers.add_parser('p', help='PDF analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
+    subparsers.add_parser('w', help='container frontend/dApp (gguf.us)')
     args = parser.parse_args()
     if args.subcommand == 'get':
         clone_file(args.url)
@@ -137,6 +138,10 @@ def __init__():
         print("Please select a GGUF file to download:")
         extract_names(json_data)
         handle_user_input(json_data)
+    elif args.subcommand == 'w':
+        print("activating browser...")
+        import webbrowser
+        webbrowser.open("https://gguf.us")
     elif args.subcommand == 'r':
         from llama_core import read
     elif args.subcommand == 'i':
@@ -159,7 +164,6 @@ def __init__():
                 llm = Llama(model_path=ModelPath)
                 while True:
                     ask = input("---Enter to select a PDF file (Q for quit)---")
-                    # if ask == "q" or ask == "Q":
                     if ask.lower() == 'q':
                         break
                     pdf_handler(llm)
@@ -169,10 +173,6 @@ def __init__():
             print("No GGUF files are available in the current directory.")
             input("--- Press ENTER To Exit ---")
         print("Goodbye!")
-    # elif args.subcommand == 'g':
-    #     from llama_core import gui
-    # elif args.subcommand == 'c':
-    #     from llama_core import cli
     elif args.subcommand == 'c':
         import os
         def clear():
