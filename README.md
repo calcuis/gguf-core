@@ -56,8 +56,7 @@ You can now load your PDF file(s) straight into the model for generating digeste
 ```
 gguf p
 ```
-#### webpage (alpha)
+#### launch to container frontend/dApp (gguf.us)
 ```
-https://gguf.us
+gguf w
 ```
-paste it (gguf.us) to browser instead of cmd console
