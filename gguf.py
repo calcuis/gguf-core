@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.32"
+__version__="0.0.33"
 
 import argparse, json, os.path, urllib.request
 
@@ -42,9 +42,10 @@ def pdf_handler(llm):
             from llama_core.rich.progress import Progress
             with Progress(transient=True) as progress:
                 task = progress.add_task("Processing", total=None)
-                output = llm("Q: "+inject, max_tokens=32768, echo=True)
+                output = llm("Q: "+inject, max_tokens=32768, echo=False)
                 answer = output['choices'][0]['text']
-                print(answer+"\n")
+                token_info = output["usage"]["total_tokens"]
+                print("\n>>>"+answer+"...<<< (token spent: "+str(token_info)+")\n")
             # ###########################################
         except (ValueError, IndexError):
             print("Invalid choice. Please enter a valid number.")
