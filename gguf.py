@@ -20,8 +20,6 @@ def pdf_handler(llm):
             choice_index=int(choice)-1
             selected_file=pdf_files[choice_index]
             print(f"PDF file: {selected_file} is selected!")
-            # from pypdf import PdfReader (pypdf dropped)
-            # from llama_core.rpdf import PdfReader # generic module adopted
             from llama_core.pdf import PdfReader # rpdf => pdf (lama_core >=0.1.1)
             reader = PdfReader(selected_file)
             text=""
@@ -29,22 +27,23 @@ def pdf_handler(llm):
             for i in range(number_of_pages):
                 page = reader.pages[i]
                 text += page.extract_text()
-            # # print(text)
             # Join text
             output_text = join_text(text)
             inject = f"analyze the content below: "+output_text
+            # ###########################################
             from llama_core.rich.console import Console
             console = Console()
-            console.print(f"\n[green]PDF cotent extracted as below:\n\n[yellow]"+text)
-            # print(f"\nPDF cotent extracted as below:\n\n"+text)
+            console.print(f"\n[green]PDF content extracted as below:\n\n[yellow]"+text)
             input("---Enter to analyze the PDF content above---")
-            # ###########################################
             from llama_core.rich.progress import Progress
             with Progress(transient=True) as progress:
                 task = progress.add_task("Processing", total=None)
+                # output = llm("Q: "+inject, max_tokens=32768, echo=True)
                 output = llm("Q: "+inject, max_tokens=32768, echo=False)
                 answer = output['choices'][0]['text']
+                # print(inject+"\n")
                 token_info = output["usage"]["total_tokens"]
+                # print(answer+"\n")
                 print("\n>>>"+answer+"...<<< (token spent: "+str(token_info)+")\n")
             # ###########################################
         except (ValueError, IndexError):
@@ -52,7 +51,44 @@ def pdf_handler(llm):
     else:
         print("No PDF files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# from rich.progress import Progress (rich dropped)
+# ###########################################################################
+def wav_handler(llm):
+    import os
+    wav_files = [file for file in os.listdir() if file.endswith('.wav')]
+    if wav_files:
+        print("WAV file(s) available. Select which one to use:")
+        for index, file_name in enumerate(wav_files, start=1):
+            print(f"{index}. {file_name}")
+        choice = input(f"Enter your choice (1 to {len(wav_files)}): ")
+        try:
+            choice_index=int(choice)-1
+            selected_file=wav_files[choice_index]
+            print(f"WAV file: {selected_file} is selected!")
+            import speech_recognition as sr
+            r = sr.Recognizer()
+            with sr.AudioFile(selected_file) as source:
+                audio = r.record(source)
+            try:
+                text = r.recognize_sphinx(audio)
+                from llama_core.rich.console import Console
+                console = Console()
+                console.print(f"\n[green]Speech/voice content recognized as: [yellow]"+text)
+                from llama_core.rich.progress import Progress
+                with Progress(transient=True) as progress:
+                    task = progress.add_task("Processing", total=None)
+                    output = llm("\nQ: "+text, max_tokens=16384, echo=True)
+                    answer = output['choices'][0]['text']
+                    print(answer+"\n")
+            except sr.UnknownValueError:
+                print("Could not understand audio content")
+            except sr.RequestError as e:
+                print("Error; {0}".format(e))
+        except (ValueError, IndexError):
+            print("Invalid choice. Please enter a valid number.")
+    else:
+        print("No WAV files are available in the current directory.")
+        input("--- Press ENTER To Exit ---")
+# ###########################################################################
 from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
 
 def get_file_size(url):
