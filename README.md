@@ -62,7 +62,7 @@ You can speak/talk straight to GGUF right away; prompt WAV(s) into the model for
 gguf w
 ```
 #### wav analyzor (online)
-more accurate (via Google open api); Internet access needed; try it out by:
+more accurate (via google Open api); Internet access needed; try it out by:
 ```
 gguf o
 ```
