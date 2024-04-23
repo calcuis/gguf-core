@@ -56,7 +56,7 @@ You can now load your PDF file(s) straight into the model for generating digeste
 ```
 gguf p
 ```
-#### wav analyzor (beta)
+#### wav analyzor (offline)
 You can speak/talk straight to GGUF right away; prompt WAV(s) into the model for feedback; try it out by:
 ```
 gguf w
