@@ -59,7 +59,7 @@ gguf p
 #### wav analyzor (offline)
 You can speak/talk straight to GGUF right away; prompt WAV(s) into the model for feedback; try it out by:
 ```
-gguf w
+gguf f
 ```
 #### wav analyzor (online)
 more accurate (via google Open api); Internet access needed; try it out by:
