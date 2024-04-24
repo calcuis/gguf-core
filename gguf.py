@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.36"
+__version__="0.0.37"
 
 import argparse, json, os.path, urllib.request
 def wav_handler_online(llm):
