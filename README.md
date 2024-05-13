@@ -66,6 +66,10 @@ more accurate (via google Open api); Internet access needed; try it out by:
 ```
 gguf o
 ```
+#### launch to page/container (gguf.io)
+```
+gguf io
+```
 #### launch to page/container (gguf.us)
 ```
 gguf us
