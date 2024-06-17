@@ -35,12 +35,7 @@ selection menu for connector interface(s) above
 ```
 gguf i
 ```
-#### model analyzor (beta)
-give basic model info
-```
-gguf a
-```
-#### metadata reader
+#### metadata reader (beta)
 read model metadata for detail(s)
 ```
 gguf r
