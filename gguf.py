@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.39"
+__version__="0.0.40"
 
 import argparse, json, os.path, urllib.request
 def wav_handler_online(llm):
@@ -194,6 +194,7 @@ def __init__():
     clone_parser = subparsers.add_parser('get', help='download a GGUF file/model from URL')
     clone_parser.add_argument('url', type=str, help='URL to download/clone from (i.e., gguf get [url])')
     # Subparser for subcommands
+    subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('c', help='CLI connector')
     subparsers.add_parser('g', help='GUI connector')
     subparsers.add_parser('i', help='interface selector')
@@ -221,6 +222,8 @@ def __init__():
         print("activating browser...")
         import webbrowser
         webbrowser.open("https://gguf.io")
+    elif args.subcommand == 'a':
+        from llama_core import parse
     elif args.subcommand == 'r':
         from llama_core import read
     elif args.subcommand == 'i':
