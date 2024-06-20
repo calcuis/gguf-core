@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.41"
+__version__="0.0.42"
 
 import argparse, json, os.path, urllib.request
 def wav_handler_online(llm):
@@ -198,6 +198,7 @@ def __init__():
     subparsers.add_parser('g', help='GUI connector')
     subparsers.add_parser('i', help='interface selector')
     subparsers.add_parser('p', help='PDF analyzor (beta)')
+    subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
     subparsers.add_parser('io', help='launch to page/container (gguf.io)')
