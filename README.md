@@ -35,10 +35,14 @@ selection menu for connector interface(s) above
 ```
 gguf i
 ```
-#### metadata reader (beta)
+#### metadata reader
 read model metadata for detail(s)
 ```
 gguf r
+```
+or try model analyzor (beta)
+```
+gguf a
 ```
 GGUF file(s) in the current directory will automatically be detected by the caller.
 #### get feature
