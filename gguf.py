@@ -1,8 +1,28 @@
 # !/usr/bin/env python3
 
-__version__="0.0.42"
+__version__="0.0.43"
 
 import argparse, json, os.path, urllib.request
+# ###########################################################################################
+def read_gguf_file(gguf_file_path):
+    from llama_core.reader import GGUFReader
+    reader = GGUFReader(gguf_file_path)
+    print("Key-Value Pairs:")
+    max_key_length = max(len(key) for key in reader.fields.keys())
+    for key, field in reader.fields.items():
+        value = field.parts[field.data[0]]
+        print(f"{key:{max_key_length}} : {value}")
+    print("\n")
+    print("Tensors:")
+    tensor_info_format = "{:<30} | Shape: {:<15} | Size: {:<12} | Quantization: {}"
+    print(tensor_info_format.format("Tensor Name", "Shape", "Size", "Quantization"))
+    print("-" * 80)
+    for tensor in reader.tensors:
+        shape_str = "x".join(map(str, tensor.shape))
+        size_str = str(tensor.n_elements)
+        quantization_str = tensor.tensor_type.name
+        print(tensor_info_format.format(tensor.name, shape_str, size_str, quantization_str))
+# ###########################################################################################
 def wav_handler_online(llm):
     import os
     wav_files = [file for file in os.listdir() if file.endswith('.wav')]
@@ -40,7 +60,7 @@ def wav_handler_online(llm):
     else:
         print("No WAV files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################
+# ###########################################################################################
 def pdf_handler(llm):
     import os
     pdf_files = [file for file in os.listdir() if file.endswith('.pdf')]
@@ -88,7 +108,7 @@ def pdf_handler(llm):
     else:
         print("No PDF files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################
+# ###########################################################################################
 def wav_handler(llm):
     import os
     wav_files = [file for file in os.listdir() if file.endswith('.wav')]
@@ -125,7 +145,7 @@ def wav_handler(llm):
     else:
         print("No WAV files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################
+# ###########################################################################################
 from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
 
 def get_file_size(url):
@@ -155,7 +175,7 @@ def clone_file(url): # no more invalid certificate issues; certifi required (lla
         print(f"File cloned successfully and saved as '{filename}'({format_size(file_size)}) in the current directory.")
     except Exception as e:
         print(f"Error: {e}")
-# ###########################################################################
+# ###########################################################################################
 def read_json_file(file_path):
     response = urllib.request.urlopen(file_path)
     data = json.loads(response.read())
@@ -223,6 +243,28 @@ def __init__():
         import webbrowser
         webbrowser.open("https://gguf.io")
     elif args.subcommand == 'r':
+        import os
+        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
+        if gguf_files:
+            print("GGUF file(s) available. Select which one to read:")   
+            for index, file_name in enumerate(gguf_files, start=1):
+                print(f"{index}. {file_name}")
+            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+            try:
+                choice_index=int(choice)-1
+                selected_file=gguf_files[choice_index]
+                print(f"Model file: {selected_file} is selected!")
+                ModelPath=selected_file
+                from rich.progress import Progress
+                with Progress(transient=True) as progress:
+                    task = progress.add_task("Processing", total=None)
+                    read_gguf_file(ModelPath)
+            except (ValueError, IndexError):
+                print("Invalid choice. Please enter a valid number.")
+        else:
+            print("No GGUF files are available in the current directory.")
+            input("--- Press ENTER To Exit ---")
+    elif args.subcommand == 'a':
         from llama_core import parse
     elif args.subcommand == 'i':
         from llama_core import menu
