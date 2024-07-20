@@ -1,9 +1,9 @@
 # !/usr/bin/env python3
 
-__version__="0.0.44"
+__version__="0.0.45"
 
 import argparse, json, os.path, urllib.request
-# ###########################################################################################
+
 def read_gguf_file(gguf_file_path):
     from llama_core.reader import GGUFReader
     reader = GGUFReader(gguf_file_path)
@@ -22,7 +22,7 @@ def read_gguf_file(gguf_file_path):
         size_str = str(tensor.n_elements)
         quantization_str = tensor.tensor_type.name
         print(tensor_info_format.format(tensor.name, shape_str, size_str, quantization_str))
-# ###########################################################################################
+
 def wav_handler_online(llm):
     import os
     wav_files = [file for file in os.listdir() if file.endswith('.wav')]
@@ -60,7 +60,7 @@ def wav_handler_online(llm):
     else:
         print("No WAV files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################################
+
 def pdf_handler(llm):
     import os
     pdf_files = [file for file in os.listdir() if file.endswith('.pdf')]
@@ -87,7 +87,6 @@ def pdf_handler(llm):
             # Join text
             output_text = join_text(text)
             inject = f"analyze the content below: "+output_text
-            # ###########################################
             from llama_core.rich.console import Console
             console = Console()
             console.print(f"\n[green]PDF content extracted as below:\n\n[yellow]"+text)
@@ -102,13 +101,12 @@ def pdf_handler(llm):
                 token_info = output["usage"]["total_tokens"]
                 # print(answer+"\n")
                 print("\n>>>"+answer+"...<<< (token spent: "+str(token_info)+")\n")
-            # ###########################################
         except (ValueError, IndexError):
             print("Invalid choice. Please enter a valid number.")
     else:
         print("No PDF files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################################
+
 def wav_handler(llm):
     import os
     wav_files = [file for file in os.listdir() if file.endswith('.wav')]
@@ -145,7 +143,7 @@ def wav_handler(llm):
     else:
         print("No WAV files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
-# ###########################################################################################
+
 from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
 
 def get_file_size(url):
@@ -175,7 +173,7 @@ def clone_file(url): # no more invalid certificate issues; certifi required (lla
         print(f"File cloned successfully and saved as '{filename}'({format_size(file_size)}) in the current directory.")
     except Exception as e:
         print(f"Error: {e}")
-# ###########################################################################################
+
 def read_json_file(file_path):
     response = urllib.request.urlopen(file_path)
     data = json.loads(response.read())
@@ -317,7 +315,6 @@ def __init__():
                 ModelPath=selected_file
                 from llama_core import Llama
                 llm = Llama(model_path=ModelPath)
-                # ##########################################################
                 clear()
                 while True:
                     ask = input("Enter a Question (Q for quit): ")
@@ -333,7 +330,6 @@ def __init__():
                         clear()
                         print("Raw input: "+ask+" (token used: "+str(token_info)+")\n")
                         print(answer+"\n")
-                # ##########################################################
             except (ValueError, IndexError):
                 print("Invalid choice. Please enter a valid number.")
         else:
