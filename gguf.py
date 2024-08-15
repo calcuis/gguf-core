@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.45"
+__version__="0.0.46"
 
 import argparse, json, os.path, urllib.request
 
@@ -144,8 +144,6 @@ def wav_handler(llm):
         print("No WAV files are available in the current directory.")
         input("--- Press ENTER To Exit ---")
 
-from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
-
 def get_file_size(url):
     with urllib.request.urlopen(url) as response:
         size = int(response.headers['Content-Length'])
@@ -158,6 +156,7 @@ def clone_file(url): # no more invalid certificate issues; certifi required (lla
     try:
         file_size = get_file_size(url)
         filename = os.path.basename(url)
+        from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
         with Progress(transient=True) as progress:
             task = progress.add_task(f"Downloading {filename}", total=file_size)
             with urllib.request.urlopen(url) as response, open(filename, 'wb') as file:
