@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.48"
+__version__="0.0.49"
 
 import argparse, json, os.path, urllib.request
 
@@ -65,7 +65,6 @@ def pdf_handler(llm):
     import os
     pdf_files = [file for file in os.listdir() if file.endswith('.pdf')]
     def join_text(input_text):
-        # Remove newline characters and join lines into one
         joined_text = ' '.join(input_text.splitlines())
         return joined_text
     if pdf_files:
@@ -84,7 +83,6 @@ def pdf_handler(llm):
             for i in range(number_of_pages):
                 page = reader.pages[i]
                 text += page.extract_text()
-            # Join text
             output_text = join_text(text)
             inject = f"analyze the content below: "+output_text
             from llama_core.rich.console import Console
@@ -97,9 +95,7 @@ def pdf_handler(llm):
                 # output = llm("Q: "+inject, max_tokens=32768, echo=True)
                 output = llm("Q: "+inject, max_tokens=32768, echo=False)
                 answer = output['choices'][0]['text']
-                # print(inject+"\n")
                 token_info = output["usage"]["total_tokens"]
-                # print(answer+"\n")
                 print("\n>>>"+answer+"...<<< (token spent: "+str(token_info)+")\n")
         except (ValueError, IndexError):
             print("Invalid choice. Please enter a valid number.")
