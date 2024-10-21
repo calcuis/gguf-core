@@ -214,6 +214,7 @@ def __init__():
     subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
+    subparsers.add_parser('comfy', help='get comfy GGUF pack')
     subparsers.add_parser('io', help='launch to page/container (gguf.io)')
     subparsers.add_parser('us', help='launch to page/container (gguf.us)')
     args = parser.parse_args()
@@ -227,6 +228,8 @@ def __init__():
         print("Please select a GGUF file to download:")
         extract_names(json_data)
         handle_user_input(json_data)
+    elif args.subcommand == 'comfy':
+        clone_file("https://github.com/calcuis/gguf-comfy/releases/download/0.0.2/ComfyUI_GGUF_windows_portable.7z")
     elif args.subcommand == 'us':
         print("activating browser...")
         import webbrowser
