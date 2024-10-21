@@ -55,6 +55,11 @@ You can either use the get feature above or opt a sample GGUF straight from the 
 ```
 gguf s
 ```
+#### comfy gguf pack
+Download ComfyUI GGUF portable package by:
+```
+gguf comfy
+```
 #### pdf analyzor (beta)
 You can now load your PDF file(s) straight into the model for generating digested summary; try it out by:
 ```
