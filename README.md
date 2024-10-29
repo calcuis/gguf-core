@@ -55,7 +55,7 @@ You can either use the get feature above or opt a sample GGUF straight from the 
 ```
 gguf s
 ```
-#### comfy gguf pack
+#### comfy gguf pack (beta)
 Download ComfyUI GGUF portable package by:
 ```
 gguf comfy
