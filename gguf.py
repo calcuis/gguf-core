@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.52"
+__version__="0.0.53"
 
 import argparse, json, os.path, urllib.request
 
@@ -216,8 +216,7 @@ def __init__():
     subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
-    subparsers.add_parser('io', help='launch to page/container (gguf.io)')
-    subparsers.add_parser('us', help='launch to page/container (gguf.us)')
+    subparsers.add_parser('comfy', help='download comfy pack (beta)')
     args = parser.parse_args()
     if args.subcommand == 'get':
         clone_file(args.url)
@@ -230,7 +229,7 @@ def __init__():
         extract_names(json_data)
         handle_user_input(json_data)
     elif args.subcommand == 'comfy':
-        clone_file("https://github.com/calcuis/gguf-comfy/releases/download/0.0.3/ComfyUI_GGUF_windows_portable.7z")
+        clone_file("https://github.com/calcuis/gguf-comfy/releases/download/0.0.4/ComfyUI_GGUF_windows_portable.7z")
     elif args.subcommand == 'us':
         print("activating browser...")
         import webbrowser
