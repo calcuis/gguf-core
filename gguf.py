@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.54"
+__version__="0.0.55"
 
 import argparse, json, os.path, urllib.request
 
@@ -229,7 +229,10 @@ def __init__():
         extract_names(json_data)
         handle_user_input(json_data)
     elif args.subcommand == 'comfy':
-        clone_file("https://github.com/calcuis/gguf-comfy/releases/download/0.0.5/ComfyUI_GGUF_windows_portable.7z")
+        version = "https://raw.githubusercontent.com/calcuis/gguf-comfy/main/version.json"
+        jdata = read_json_file(version)
+        url = f"https://github.com/calcuis/gguf-comfy/releases/download/{jdata[0]['version']}/ComfyUI_GGUF_windows_portable.7z"
+        clone_file(url)
     elif args.subcommand == 'us':
         print("activating browser...")
         import webbrowser
