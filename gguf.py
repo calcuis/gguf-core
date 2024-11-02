@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.55"
+__version__="0.0.56"
 
 import argparse, json, os.path, urllib.request
 
@@ -211,6 +211,7 @@ def __init__():
     # Subparser for subcommands
     subparsers.add_parser('c', help='CLI connector')
     subparsers.add_parser('g', help='GUI connector')
+    subparsers.add_parser('v', help='vision connector')
     subparsers.add_parser('i', help='interface selector')
     subparsers.add_parser('p', help='PDF analyzor (beta)')
     subparsers.add_parser('a', help='model analyzor (beta)')
