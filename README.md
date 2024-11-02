@@ -30,6 +30,11 @@ with graphical user interface
 ```
 gguf g
 ```
+#### vision connector (beta)
+with vision model supported
+```
+gguf v
+```
 #### interface selector
 selection menu for connector interface(s) above
 ```
