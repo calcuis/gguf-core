@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.56"
+__version__="0.0.57"
 
 import argparse, json, os.path, urllib.request
 
@@ -203,8 +203,6 @@ def __init__():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     # Subparser session
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help="choose a subcommand:")
-    # new feature gguf-comfy
-    subparsers.add_parser('comfy', help='download comfy GGUF pack')
     # Subparser for 'get [URL]' subcommand
     clone_parser = subparsers.add_parser('get', help='download a GGUF file/model from URL')
     clone_parser.add_argument('url', type=str, help='URL to download/clone from (i.e., gguf get [url])')
