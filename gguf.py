@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.57"
+__version__="0.0.58"
 
 import argparse, json, os.path, urllib.request
 
@@ -266,6 +266,73 @@ def __init__():
         from llama_core import parse
     elif args.subcommand == 'i':
         from llama_core import menu
+    elif args.subcommand == 'v':
+        import os
+        def clear():
+            if os.name == 'nt':
+                _ = os.system('cls')
+            else:
+                _ = os.system('clear')
+        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
+        if gguf_files:
+            print("GGUF file(s) available. Select which one to use as Clip Handler:")
+            for index, file_name in enumerate(gguf_files, start=1):
+                print(f"{index}. {file_name}")
+            choice1 = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+            try:
+                choice_index=int(choice1)-1
+                selected_file=gguf_files[choice_index]
+                print(f"Model file: {selected_file} is selected!")
+                clip_model_path=selected_file
+                from llama_core.llama_chat_format import Llava15ChatHandler
+                chat_handler = Llava15ChatHandler(clip_model_path)
+                clear()
+                print("Clip Handler: "+ask+" has been activated!\n")
+                print("GGUF file(s) available. Select which one to use as Vision Model:")
+                for index, file_name in enumerate(gguf_files, start=1):
+                    print(f"{index}. {file_name}")
+                choice2 = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+                try:
+                    choice_index=int(choice2)-1
+                    selected_file=gguf_files[choice_index]
+                    print(f"Model file: {selected_file} is selected!")
+                    model_path=selected_file
+                    from llama_core import Llama
+                    llm = Llama(
+                        model_path=model_path,
+                        chat_handler=chat_handler,
+                        n_ctx=2048,
+                        )
+                    clear()
+                    while True:
+                        ask = input("Provide a picture URL (Q for quit): ")
+                        if ask.lower() == 'q':
+                            break
+                        from llama_core.rich.progress import Progress
+                        with Progress(transient=True) as progress:
+                            task = progress.add_task("Processing", total=None)
+                            response = llm.create_chat_completion(
+                                messages = [
+                                    {
+                                        "role": "user",
+                                        "content": [
+                                            {"type" : "text", "text": "What's in this image?"},
+                                            {"type": "image_url", "image_url": {"url": ask } }
+                                        ]
+                                    }
+                                ]
+                            )
+                            clear()
+                            print("Picture URL: "+ask+"\n")
+                            print(">>>"+response["choices"][0]["message"]["content"])
+                except (ValueError, IndexError):
+                    print("Invalid choice. Please enter a valid number.")
+            except (ValueError, IndexError):
+                    print("Invalid choice. Please enter a valid number.")
+        else:
+            print("No GGUF files are available in the current directory.")
+            input("--- Press ENTER To Exit ---")
+        print("Goodbye!")
     elif args.subcommand == 'p':
         import os
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
@@ -296,10 +363,8 @@ def __init__():
     elif args.subcommand == 'c':
         import os
         def clear():
-            # for windows
             if os.name == 'nt':
                 _ = os.system('cls')
-            # for mac and linux(here, os.name is 'posix')
             else:
                 _ = os.system('clear')
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
