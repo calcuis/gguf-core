@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.58"
+__version__="0.0.59"
 
 import argparse, json, os.path, urllib.request
 
@@ -287,7 +287,7 @@ def __init__():
                 from llama_core.llama_chat_format import Llava15ChatHandler
                 chat_handler = Llava15ChatHandler(clip_model_path)
                 clear()
-                print("Clip Handler: "+ask+" has been activated!\n")
+                print("Clip Handler: "+clip_model_path+" has been activated!\n")
                 print("GGUF file(s) available. Select which one to use as Vision Model:")
                 for index, file_name in enumerate(gguf_files, start=1):
                     print(f"{index}. {file_name}")
