@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.60"
+__version__="0.0.61"
 
 import argparse, json, os.path, urllib.request
 
@@ -240,6 +240,10 @@ def __init__():
         print("activating browser...")
         import webbrowser
         webbrowser.open("https://gguf.io")
+    elif args.subcommand == 'org':
+        print("activating browser...")
+        import webbrowser
+        webbrowser.open("https://gguf.org")
     elif args.subcommand == 'r':
         import os
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
