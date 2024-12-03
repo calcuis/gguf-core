@@ -80,6 +80,10 @@ more accurate (via google Open api); Internet access needed; try it out by:
 ```
 gguf o
 ```
+#### launch to page/container (gguf.org)
+```
+gguf org
+```
 #### launch to page/container (gguf.io)
 ```
 gguf io
