@@ -60,6 +60,11 @@ You can either use the get feature above or opt a sample GGUF straight from the 
 ```
 gguf s
 ```
+#### prompt generator (beta)
+Generate bulk prompt/descriptor(s) by:
+```
+gguf prompt
+```
 #### comfy gguf pack (beta)
 Download ComfyUI GGUF portable package by:
 ```
