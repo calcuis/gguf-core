@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 
-__version__="0.0.61"
+__version__="0.0.62"
 
-import argparse, json, os.path, urllib.request
+import argparse, json, random, os.path, urllib.request
 
 def read_gguf_file(gguf_file_path):
     from llama_core.reader import GGUFReader
@@ -22,6 +22,13 @@ def read_gguf_file(gguf_file_path):
         size_str = str(tensor.n_elements)
         quantization_str = tensor.tensor_type.name
         print(tensor_info_format.format(tensor.name, shape_str, size_str, quantization_str))
+
+def generate_prompt(descriptors):
+    subject = random.choice(descriptors.get("subject", []))
+    hair_color = random.choice(descriptors.get("hair_color", []))
+    eye_color = random.choice(descriptors.get("eye_color", []))
+    scene = random.choice(descriptors.get("scene", []))
+    return f"A {hair_color} haired {subject} with {eye_color} eyes, {scene}."
 
 def wav_handler_online(llm):
     import os
@@ -216,6 +223,7 @@ def __init__():
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
     subparsers.add_parser('comfy', help='download comfy pack (beta)')
+    subparsers.add_parser('prompt', help='generate random prompt (beta)')
     args = parser.parse_args()
     if args.subcommand == 'get':
         clone_file(args.url)
@@ -232,6 +240,24 @@ def __init__():
         jdata = read_json_file(version)
         url = f"https://github.com/calcuis/gguf-comfy/releases/download/{jdata[0]['version']}/ComfyUI_GGUF_windows_portable.7z"
         clone_file(url)
+    elif args.subcommand == 'prompt':
+        file_path = "https://raw.githubusercontent.com/calcuis/rjj/main/descriptor.json"
+        descriptors = read_json_file(file_path)
+        if not descriptors:
+            return
+        try:
+            num_descriptors = int(input("Enter the number of prompt(s) to generate: "))
+            if num_descriptors <= 0:
+                print("Please enter a positive number.")
+                return
+            for i in range(1, num_descriptors + 1):
+                descriptor = generate_prompt(descriptors)
+                filename = f"{i}.txt"
+                with open(filename, "w", encoding="utf-8") as file:
+                    file.write(descriptor)
+            print(f"{num_descriptors} prompt(s) generated and saved in separate text file(s).")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
     elif args.subcommand == 'us':
         print("activating browser...")
         import webbrowser
