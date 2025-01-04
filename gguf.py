@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.62"
+__version__="0.0.63"
 
 import argparse, json, random, os.path, urllib.request
 
@@ -222,8 +222,8 @@ def __init__():
     subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
-    subparsers.add_parser('comfy', help='download comfy pack (beta)')
     subparsers.add_parser('prompt', help='generate random prompt (beta)')
+    subparsers.add_parser('node', help='download comfy pack with gguf-node (beta)')
     args = parser.parse_args()
     if args.subcommand == 'get':
         clone_file(args.url)
@@ -235,10 +235,10 @@ def __init__():
         print("Please select a GGUF file to download:")
         extract_names(json_data)
         handle_user_input(json_data)
-    elif args.subcommand == 'comfy':
-        version = "https://raw.githubusercontent.com/calcuis/gguf-comfy/main/version.json"
+    elif args.subcommand == 'node':
+        version = "https://raw.githubusercontent.com/calcuis/gguf/main/version.json"
         jdata = read_json_file(version)
-        url = f"https://github.com/calcuis/gguf-comfy/releases/download/{jdata[0]['version']}/ComfyUI_GGUF_windows_portable.7z"
+        url = f"https://github.com/calcuis/gguf/releases/download/{jdata[0]['version']}/ComfyUI_GGUF_windows_portable.7z"
         clone_file(url)
     elif args.subcommand == 'prompt':
         file_path = "https://raw.githubusercontent.com/calcuis/rjj/main/descriptor.json"
