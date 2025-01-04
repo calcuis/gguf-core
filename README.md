@@ -65,10 +65,10 @@ Generate bulk prompt/descriptor(s) by:
 ```
 gguf prompt
 ```
-#### comfy gguf pack (beta)
-Download ComfyUI GGUF portable package by:
+#### comfy pack with gguf node (beta)
+Download ComfyUI GGUF portable package with gguf node by:
 ```
-gguf comfy
+gguf node
 ```
 #### pdf analyzor (beta)
 You can now load your PDF file(s) straight into the model for generating digested summary; try it out by:
