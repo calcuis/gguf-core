@@ -65,8 +65,13 @@ Generate bulk prompt/descriptor(s) by:
 ```
 gguf prompt
 ```
-#### gguf node (beta)
+#### gguf comfy (beta)
 Download ComfyUI GGUF portable package with gguf node by:
+```
+gguf comfy
+```
+#### gguf node (beta)
+Download gguf node only by:
 ```
 gguf node
 ```
