@@ -1,8 +1,8 @@
 # !/usr/bin/env python3
 
-__version__="0.0.63"
+__version__="0.0.64"
 
-import argparse, json, random, os.path, urllib.request
+import argparse, json, random, os.path, urllib.request, subprocess
 
 def read_gguf_file(gguf_file_path):
     from llama_core.reader import GGUFReader
@@ -203,6 +203,20 @@ def handle_user_input(data):
         except ValueError:
             print("Invalid input. Please enter a number.")
 
+def clone_github_repo(repo_url):
+    try:
+        repo_name = repo_url.rstrip('/').split('/')[-1].replace('.git', '')
+        if os.path.exists(repo_name):
+            print(f"Error: A folder named '{repo_name}' already exists in the current directory.")
+            return
+        print(f"Cloning repository '{repo_url}'...")
+        subprocess.run(["git", "clone", repo_url], check=True)
+        print(f"Repository '{repo_name}' cloned successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Failed to clone the repository. {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
 from tkinter import *
 
 def __init__():
@@ -223,7 +237,8 @@ def __init__():
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
     subparsers.add_parser('prompt', help='generate random prompt (beta)')
-    subparsers.add_parser('node', help='download comfy pack with gguf-node (beta)')
+    subparsers.add_parser('comfy', help='download comfy pack with gguf-node')
+    subparsers.add_parser('node', help='download gguf-node only')
     args = parser.parse_args()
     if args.subcommand == 'get':
         clone_file(args.url)
@@ -236,6 +251,9 @@ def __init__():
         extract_names(json_data)
         handle_user_input(json_data)
     elif args.subcommand == 'node':
+        repo_url = "https://github.com/calcuis/gguf"
+        clone_github_repo(repo_url)
+    elif args.subcommand == 'comfy':
         version = "https://raw.githubusercontent.com/calcuis/gguf/main/version.json"
         jdata = read_json_file(version)
         url = f"https://github.com/calcuis/gguf/releases/download/{jdata[0]['version']}/ComfyUI_GGUF_windows_portable.7z"
