@@ -75,6 +75,11 @@ Download gguf node only by:
 ```
 gguf node
 ```
+#### gguf pack (beta)
+Download gguf pack by:
+```
+gguf pack
+```
 #### pdf analyzor (beta)
 You can now load your PDF file(s) straight into the model for generating digested summary; try it out by:
 ```
