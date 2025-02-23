@@ -1,9 +1,8 @@
 # !/usr/bin/env python3
 
-__version__="0.0.64"
+__version__="0.0.65"
 
 import argparse, json, random, os.path, urllib.request, subprocess
-
 def read_gguf_file(gguf_file_path):
     from llama_core.reader import GGUFReader
     reader = GGUFReader(gguf_file_path)
@@ -22,14 +21,12 @@ def read_gguf_file(gguf_file_path):
         size_str = str(tensor.n_elements)
         quantization_str = tensor.tensor_type.name
         print(tensor_info_format.format(tensor.name, shape_str, size_str, quantization_str))
-
 def generate_prompt(descriptors):
     subject = random.choice(descriptors.get("subject", []))
     hair_color = random.choice(descriptors.get("hair_color", []))
     eye_color = random.choice(descriptors.get("eye_color", []))
     scene = random.choice(descriptors.get("scene", []))
     return f"A {hair_color} haired {subject} with {eye_color} eyes, {scene}."
-
 def wav_handler_online(llm):
     import os
     wav_files = [file for file in os.listdir() if file.endswith('.wav')]
@@ -52,6 +49,7 @@ def wav_handler_online(llm):
                 from llama_core.rich.console import Console
                 console = Console()
                 console.print(f"\n[green]Speech/voice content recognized as: [yellow]"+text)
+                input("\n---Enter to prompt the WAV content recognized above into GGUF model---")
                 from llama_core.rich.progress import Progress
                 with Progress(transient=True) as progress:
                     task = progress.add_task("Processing", total=None)
@@ -66,12 +64,57 @@ def wav_handler_online(llm):
             print("Invalid choice. Please enter a valid number.")
     else:
         print("No WAV files are available in the current directory.")
-        input("--- Press ENTER To Exit ---")
-
+        input("--- Press ENTER to Skip ---")
+def wav_handler(llm):
+    import os
+    wav_files = [file for file in os.listdir() if file.endswith('.wav')]
+    if wav_files:
+        print("WAV file(s) available. Select which one to use:")
+        for index, file_name in enumerate(wav_files, start=1):
+            print(f"{index}. {file_name}")
+        choice = input(f"Enter your choice (1 to {len(wav_files)}): ")
+        try:
+            choice_index=int(choice)-1
+            selected_file=wav_files[choice_index]
+            print(f"WAV file: {selected_file} is selected!")
+            import speech_recognition as sr
+            r = sr.Recognizer()
+            with sr.AudioFile(selected_file) as source:
+                audio = r.record(source)
+            try:
+                text = r.recognize_sphinx(audio)
+                from llama_core.rich.console import Console
+                console = Console()
+                console.print(f"\n[green]Speech/voice content recognized as: [yellow]"+text)
+                # print("Content recognized: "+r.recognize_sphinx(audio))
+                # print("Content recognized: "+text)
+                # input("---Enter to analyze the WAV content above---")
+                input("\n---Enter to prompt the WAV content recognized above into GGUF model---")
+                # print("Processing...")
+                from llama_core.rich.progress import Progress
+                with Progress(transient=True) as progress:
+                    task = progress.add_task("Processing", total=None)
+                    # output = llm("Q: "+r.recognize_sphinx(audio), max_tokens=4096, echo=True)
+                    output = llm("\nQ: "+text, max_tokens=16384, echo=True)
+                    answer = output['choices'][0]['text']
+                    print(answer+"\n")
+                    # token_info = output["usage"]["total_tokens"]
+                    # print("\n>>>"+answer+"...<<< (token spent: "+str(token_info)+")\n")
+                    # print(answer+" (token spent: "+str(token_info)+")\n")
+            except sr.UnknownValueError:
+                print("Could not understand audio content")
+            except sr.RequestError as e:
+                print("Error; {0}".format(e))
+        except (ValueError, IndexError):
+            print("Invalid choice. Please enter a valid number.")
+    else:
+        print("No WAV files are available in the current directory.")
+        input("--- Press ENTER to Skip ---")
 def pdf_handler(llm):
     import os
     pdf_files = [file for file in os.listdir() if file.endswith('.pdf')]
     def join_text(input_text):
+        # Remove newline characters and join lines into one
         joined_text = ' '.join(input_text.splitlines())
         return joined_text
     if pdf_files:
@@ -95,71 +138,35 @@ def pdf_handler(llm):
             from llama_core.rich.console import Console
             console = Console()
             console.print(f"\n[green]PDF content extracted as below:\n\n[yellow]"+text)
+            # print(f"\nPDF cotent extracted as below:\n\n"+text)
             input("---Enter to analyze the PDF content above---")
+            # print("Processing...")
             from llama_core.rich.progress import Progress
             with Progress(transient=True) as progress:
                 task = progress.add_task("Processing", total=None)
                 # output = llm("Q: "+inject, max_tokens=32768, echo=True)
                 output = llm("Q: "+inject, max_tokens=32768, echo=False)
                 answer = output['choices'][0]['text']
+                # print(inject+"\n")
                 token_info = output["usage"]["total_tokens"]
+                # print(answer+"\n")
                 print("\n>>>"+answer+"...<<< (token spent: "+str(token_info)+")\n")
         except (ValueError, IndexError):
             print("Invalid choice. Please enter a valid number.")
     else:
         print("No PDF files are available in the current directory.")
-        input("--- Press ENTER To Exit ---")
-
-def wav_handler(llm):
-    import os
-    wav_files = [file for file in os.listdir() if file.endswith('.wav')]
-    if wav_files:
-        print("WAV file(s) available. Select which one to use:")
-        for index, file_name in enumerate(wav_files, start=1):
-            print(f"{index}. {file_name}")
-        choice = input(f"Enter your choice (1 to {len(wav_files)}): ")
-        try:
-            choice_index=int(choice)-1
-            selected_file=wav_files[choice_index]
-            print(f"WAV file: {selected_file} is selected!")
-            import speech_recognition as sr
-            r = sr.Recognizer()
-            with sr.AudioFile(selected_file) as source:
-                audio = r.record(source)
-            try:
-                text = r.recognize_sphinx(audio)
-                from llama_core.rich.console import Console
-                console = Console()
-                console.print(f"\n[green]Speech/voice content recognized as: [yellow]"+text)
-                from llama_core.rich.progress import Progress
-                with Progress(transient=True) as progress:
-                    task = progress.add_task("Processing", total=None)
-                    output = llm("\nQ: "+text, max_tokens=16384, echo=True)
-                    answer = output['choices'][0]['text']
-                    print(answer+"\n")
-            except sr.UnknownValueError:
-                print("Could not understand audio content")
-            except sr.RequestError as e:
-                print("Error; {0}".format(e))
-        except (ValueError, IndexError):
-            print("Invalid choice. Please enter a valid number.")
-    else:
-        print("No WAV files are available in the current directory.")
-        input("--- Press ENTER To Exit ---")
-
+        input("--- Press ENTER to Skip ---")
 def get_file_size(url):
     with urllib.request.urlopen(url) as response:
         size = int(response.headers['Content-Length'])
     return size
-
 def format_size(size_bytes):
     return f"{size_bytes / (1024 * 1024):.2f} MB"
-
-def clone_file(url): # no more invalid certificate issues; certifi required (llama_core >=0.1.9)
+def clone_file(url): # no more invalid certificate issues; llama_core >=0.1.9 required
     try:
         file_size = get_file_size(url)
         filename = os.path.basename(url)
-        from llama_core.rich.progress import Progress # generic module adopted (lama_core >=0.1.2)
+        from llama_core.rich.progress import Progress
         with Progress(transient=True) as progress:
             task = progress.add_task(f"Downloading {filename}", total=file_size)
             with urllib.request.urlopen(url) as response, open(filename, 'wb') as file:
@@ -175,18 +182,13 @@ def clone_file(url): # no more invalid certificate issues; certifi required (lla
         print(f"File cloned successfully and saved as '{filename}'({format_size(file_size)}) in the current directory.")
     except Exception as e:
         print(f"Error: {e}")
-
 def read_json_file(file_path):
     response = urllib.request.urlopen(file_path)
     data = json.loads(response.read())
-    # with open(file_path, 'r') as file:
-    #     data = json.load(file)
     return data
-
 def extract_names(data):
     for idx, entry in enumerate(data, start=1):
         print(f'{idx}. {entry["name"]}')
-
 def handle_user_input(data):
     while True:
         user_choice = input(f"Enter your choice (1 to {len(data)}) or 'q' to quit: ")
@@ -202,7 +204,6 @@ def handle_user_input(data):
                 print("Invalid selection. Please enter a valid number.")
         except ValueError:
             print("Invalid input. Please enter a number.")
-
 def clone_github_repo(repo_url):
     try:
         repo_name = repo_url.rstrip('/').split('/')[-1].replace('.git', '')
@@ -216,29 +217,33 @@ def clone_github_repo(repo_url):
         print(f"Error: Failed to clone the repository. {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
-
 from tkinter import *
-
 def __init__():
     parser = argparse.ArgumentParser(description="gguf will execute different functions based on command-line arguments")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     # Subparser session
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand", help="choose a subcommand:")
-    # Subparser for 'get [URL]' subcommand
-    clone_parser = subparsers.add_parser('get', help='download a GGUF file/model from URL')
+    # Subparser 'get [URL]' subcommand
+    clone_parser = subparsers.add_parser('get', help='get a GGUF file/model from URL')
     clone_parser.add_argument('url', type=str, help='URL to download/clone from (i.e., gguf get [url])')
-    # Subparser for subcommands
+    # Subparser subcommands
+    subparsers.add_parser('org', help='launch to page/container (gguf.org)')
+    subparsers.add_parser('io', help='launch to page/container (gguf.io)')
+    subparsers.add_parser('us', help='launch to page/container (gguf.us)')
     subparsers.add_parser('c', help='CLI connector')
     subparsers.add_parser('g', help='GUI connector')
     subparsers.add_parser('v', help='vision connector')
     subparsers.add_parser('i', help='interface selector')
     subparsers.add_parser('p', help='PDF analyzor (beta)')
+    subparsers.add_parser('f', help='WAV analyzor (offline)')
+    subparsers.add_parser('o', help='WAV analyzor (online)')
     subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
     subparsers.add_parser('prompt', help='generate random prompt (beta)')
     subparsers.add_parser('comfy', help='download comfy pack with gguf-node')
     subparsers.add_parser('node', help='download gguf-node only')
+    subparsers.add_parser('pack', help='download gguf pack')
     args = parser.parse_args()
     if args.subcommand == 'get':
         clone_file(args.url)
@@ -254,9 +259,16 @@ def __init__():
         repo_url = "https://github.com/calcuis/gguf"
         clone_github_repo(repo_url)
     elif args.subcommand == 'comfy':
+        # clone_file("https://github.com/calcuis/gguf-comfy/releases/download/0.0.5/ComfyUI_GGUF_windows_portable.7z")
+        # version = "https://raw.githubusercontent.com/calcuis/gguf-comfy/main/version.json"
         version = "https://raw.githubusercontent.com/calcuis/gguf/main/version.json"
         jdata = read_json_file(version)
         url = f"https://github.com/calcuis/gguf/releases/download/{jdata[0]['version']}/ComfyUI_GGUF_windows_portable.7z"
+        clone_file(url)
+    elif args.subcommand == 'pack':
+        version = "https://raw.githubusercontent.com/calcuis/gguf-pack/main/version.json"
+        jdata = read_json_file(version)
+        url = f"https://github.com/calcuis/gguf/releases/download/{jdata[0]['version']}/GGUF_windows_portable.7z"
         clone_file(url)
     elif args.subcommand == 'prompt':
         file_path = "https://raw.githubusercontent.com/calcuis/rjj/main/descriptor.json"
@@ -288,7 +300,10 @@ def __init__():
         print("activating browser...")
         import webbrowser
         webbrowser.open("https://gguf.org")
+    elif args.subcommand == 'a':
+        from llama_core import parse
     elif args.subcommand == 'r':
+        # from llama_core import read
         import os
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
         if gguf_files:
@@ -301,7 +316,7 @@ def __init__():
                 selected_file=gguf_files[choice_index]
                 print(f"Model file: {selected_file} is selected!")
                 ModelPath=selected_file
-                from rich.progress import Progress
+                from llama_core.rich.progress import Progress
                 with Progress(transient=True) as progress:
                     task = progress.add_task("Processing", total=None)
                     read_gguf_file(ModelPath)
@@ -310,15 +325,15 @@ def __init__():
         else:
             print("No GGUF files are available in the current directory.")
             input("--- Press ENTER To Exit ---")
-    elif args.subcommand == 'a':
-        from llama_core import parse
     elif args.subcommand == 'i':
         from llama_core import menu
     elif args.subcommand == 'v':
         import os
         def clear():
+            # for windows
             if os.name == 'nt':
                 _ = os.system('cls')
+            # for mac and linux(here, os.name is 'posix')
             else:
                 _ = os.system('clear')
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
@@ -372,7 +387,7 @@ def __init__():
                             )
                             clear()
                             print("Picture URL: "+ask+"\n")
-                            print(">>>"+response["choices"][0]["message"]["content"])
+                            print("👀 >>>"+response["choices"][0]["message"]["content"]+"\n")
                 except (ValueError, IndexError):
                     print("Invalid choice. Please enter a valid number.")
             except (ValueError, IndexError):
@@ -381,8 +396,15 @@ def __init__():
             print("No GGUF files are available in the current directory.")
             input("--- Press ENTER To Exit ---")
         print("Goodbye!")
-    elif args.subcommand == 'p':
+    elif args.subcommand == 'o':
         import os
+        def clear():
+            # for windows
+            if os.name == 'nt':
+                _ = os.system('cls')
+            # for mac and linux(here, os.name is 'posix')
+            else:
+                _ = os.system('clear')
         gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
         if gguf_files:
             print("GGUF file(s) available. Select which one to use:")
@@ -397,6 +419,73 @@ def __init__():
                 print("Processing...")
                 from llama_core import Llama
                 llm = Llama(model_path=ModelPath)
+                clear()
+                while True:
+                    ask = input("---Enter to select a WAV file (Q for quit)---")
+                    if ask.lower() == 'q':
+                        break
+                    wav_handler_online(llm)
+            except (ValueError, IndexError):
+                print("Invalid choice. Please enter a valid number.")
+        else:
+            print("No GGUF files are available in the current directory.")
+            input("--- Press ENTER To Exit ---")
+        print("Goodbye!")
+    elif args.subcommand == 'f':
+        import os
+        def clear():
+            if os.name == 'nt':
+                _ = os.system('cls')
+            else:
+                _ = os.system('clear')
+        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
+        if gguf_files:
+            print("GGUF file(s) available. Select which one to use:")
+            for index, file_name in enumerate(gguf_files, start=1):
+                print(f"{index}. {file_name}")
+            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+            try:
+                choice_index=int(choice)-1
+                selected_file=gguf_files[choice_index]
+                print(f"Model file: {selected_file} is selected!")
+                ModelPath=selected_file
+                print("Processing...")
+                from llama_core import Llama
+                llm = Llama(model_path=ModelPath)
+                clear()
+                while True:
+                    ask = input("---Enter to select a WAV file (Q for quit)---")
+                    if ask.lower() == 'q':
+                        break
+                    wav_handler(llm)
+            except (ValueError, IndexError):
+                print("Invalid choice. Please enter a valid number.")
+        else:
+            print("No GGUF files are available in the current directory.")
+            input("--- Press ENTER To Exit ---")
+        print("Goodbye!")
+    elif args.subcommand == 'p':
+        import os
+        def clear():
+            if os.name == 'nt':
+                _ = os.system('cls')
+            else:
+                _ = os.system('clear')
+        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
+        if gguf_files:
+            print("GGUF file(s) available. Select which one to use:")
+            for index, file_name in enumerate(gguf_files, start=1):
+                print(f"{index}. {file_name}")
+            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+            try:
+                choice_index=int(choice)-1
+                selected_file=gguf_files[choice_index]
+                print(f"Model file: {selected_file} is selected!")
+                ModelPath=selected_file
+                print("Processing...")
+                from llama_core import Llama
+                llm = Llama(model_path=ModelPath)
+                clear()
                 while True:
                     ask = input("---Enter to select a PDF file (Q for quit)---")
                     if ask.lower() == 'q':
@@ -408,6 +497,66 @@ def __init__():
             print("No GGUF files are available in the current directory.")
             input("--- Press ENTER To Exit ---")
         print("Goodbye!")
+    elif args.subcommand == 'g':
+        import os
+        def clear():
+            if os.name == 'nt':
+                _ = os.system('cls')
+            else:
+                _ = os.system('clear')
+        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
+        if gguf_files:
+            print("GGUF file(s) available. Select which one to use:")
+            for index, file_name in enumerate(gguf_files, start=1):
+                print(f"{index}. {file_name}")
+            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
+            try:
+                choice_index=int(choice)-1
+                selected_file=gguf_files[choice_index]
+                print(f"Model file: {selected_file} is selected!")
+                ModelPath=selected_file
+                from llama_core import Llama
+                llm = Llama(model_path=ModelPath)
+                clear()
+                print("Model Activated! Switch to chatPIG pop-up; Enter a Question then click Submit")
+                # from tkinter import * # move it to the top
+                import tkinter.scrolledtext as st
+                root = Tk()
+                root.title("chatPIG")
+                root.columnconfigure([0, 1, 2], minsize=150)
+                root.rowconfigure(0, weight=2)
+                root.rowconfigure(1, weight=1)
+                icon = PhotoImage(file = os.path.join(os.path.dirname(__file__), "logo.png"))
+                root.iconphoto(False, icon)
+                i = Entry()
+                o = st.ScrolledText()
+                def submit(i):
+                    root.title("Processing...")
+                    clear()
+                    from llama_core.rich.console import Console
+                    console = Console()
+                    console.print("*note: [green]it might show: (Not Responding) and/or keep spinning; but running in background still; please be patient.")
+                    from llama_core.rich.progress import Progress
+                    with Progress(transient=True) as progress:
+                        task = progress.add_task("Processing", total=None)
+                        output = llm("Q: "+str(i.get()), max_tokens=2048, echo=True)
+                        answer = output['choices'][0]['text']
+                        token_info = output["usage"]["total_tokens"]
+                        print("Raw input: "+str(i.get())+" (token used: "+str(token_info)+")\n")
+                        print(answer)
+                    o.insert(INSERT, answer+"\n\n")
+                    i.delete(0, END)
+                    root.title("chatPIG")
+                btn = Button(text = "Submit", command = lambda: submit(i))
+                i.grid(row=1, columnspan=2, sticky="nsew")
+                btn.grid(row=1, column=2, sticky="nsew")
+                o.grid(row=0, columnspan=3, sticky="nsew")
+                root.mainloop()
+            except (ValueError, IndexError):
+                print("Invalid choice. Please enter a valid number.")
+        else:
+            print("No GGUF files are available in the current directory.")
+            input("--- Press ENTER To Exit ---")
     elif args.subcommand == 'c':
         import os
         def clear():
@@ -449,63 +598,3 @@ def __init__():
             print("No GGUF files are available in the current directory.")
             input("--- Press ENTER To Exit ---")
         print("Goodbye!")
-    elif args.subcommand == 'g':
-        import os
-        def clear():
-            # for windows
-            if os.name == 'nt':
-                _ = os.system('cls')
-            # for mac and linux(here, os.name is 'posix')
-            else:
-                _ = os.system('clear')
-        gguf_files = [file for file in os.listdir() if file.endswith('.gguf')]
-        if gguf_files:
-            print("GGUF file(s) available. Select which one to use:")
-            for index, file_name in enumerate(gguf_files, start=1):
-                print(f"{index}. {file_name}")
-            choice = input(f"Enter your choice (1 to {len(gguf_files)}): ")
-            try:
-                choice_index=int(choice)-1
-                selected_file=gguf_files[choice_index]
-                print(f"Model file: {selected_file} is selected!")
-                ModelPath=selected_file
-                from llama_core import Llama
-                llm = Llama(model_path=ModelPath)
-                # from tkinter import *
-                import tkinter.scrolledtext as st
-                root = Tk()
-                root.title("chatGPT")
-                root.columnconfigure([0, 1, 2], minsize=150)
-                root.rowconfigure(0, weight=2)
-                root.rowconfigure(1, weight=1)
-                # icon = PhotoImage(file = os.path.join(os.path.dirname(__file__), "logo.png"))
-                # root.iconphoto(False, icon)
-                i = Entry()
-                o = st.ScrolledText()
-                def submit(i):
-                    root.title("Processing...")
-                    clear()
-                    from llama_core.rich.console import Console
-                    console = Console()
-                    console.print("*note: [green]it might show: (Not Responding) and/or keep spinning; but running in background still; please be patient.")
-                    from llama_core.rich.progress import Progress
-                    with Progress(transient=True) as progress:
-                        task = progress.add_task("Processing", total=None)
-                        output = llm("Q: "+str(i.get()), max_tokens=2048, echo=True)
-                        answer = output['choices'][0]['text']
-                        token_info = output["usage"]["total_tokens"]
-                        print("Raw input: "+str(i.get())+" (token used: "+str(token_info)+")\n")
-                        print(answer)
-                    o.insert(INSERT, answer+"\n\n")
-                    i.delete(0, END)
-                    root.title("chatGPT")
-                btn = Button(text = "Submit", command = lambda: submit(i))
-                i.grid(row=1, columnspan=2, sticky="nsew")
-                btn.grid(row=1, column=2, sticky="nsew")
-                o.grid(row=0, columnspan=3, sticky="nsew")
-                root.mainloop()
-            except (ValueError, IndexError):
-                print("Invalid choice. Please enter a valid number.")
-        else:
-            print("No GGUF files are available in the current directory.")
-            input("--- Press ENTER To Exit ---")
