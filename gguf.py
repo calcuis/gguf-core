@@ -1,6 +1,6 @@
 # !/usr/bin/env python3
 
-__version__="0.0.65"
+__version__="0.0.66"
 
 import argparse, json, random, os.path, urllib.request, subprocess
 def read_gguf_file(gguf_file_path):
@@ -217,6 +217,92 @@ def clone_github_repo(repo_url):
         print(f"Error: Failed to clone the repository. {e}")
     except Exception as e:
         print(f"Unexpected error: {e}")
+def list_gguf_files():
+    import os
+    files = [f for f in os.listdir() if f.endswith(".gguf")]
+    if not files:
+        print("No .gguf files found in the current directory.")
+        return None
+    print("Available .gguf files:")
+    for i, f in enumerate(files, 1):
+        print(f"{i}. {f}")
+    while True:
+        try:
+            choice = int(input("Select a file by number: "))
+            return files[choice - 1]
+        except (ValueError, IndexError):
+            print("Invalid selection. Try again.")
+def get_cutoff_size():
+    while True:
+        try:
+            mb = float(input("Enter cutoff size for each part (in MB): "))
+            return int(mb * 1024 * 1024)
+        except ValueError:
+            print("Please enter a valid number.")
+def get_tensor_count():
+    while True:
+        try:
+            count = int(input("Enter the total tensor count (split.tensors.count): "))
+            return count
+        except ValueError:
+            print("Please enter a valid integer.")
+def get_cutoff_size():
+    while True:
+        try:
+            mb = float(input("Enter cutoff size for each part (in MB): "))
+            return int(mb * 1024 * 1024)
+        except ValueError:
+            print("Please enter a valid number.")
+def split_gguf_file(filename, cutoff_size):
+    with open(filename, "rb") as f:
+        data = f.read()
+    total_size = len(data)
+    parts = []
+    offset = 0
+    part_id = 1
+    while offset < total_size:
+        end = min(offset + cutoff_size, total_size)
+        part_data = data[offset:end]
+        part_name = f"model-{part_id:05d}-of-XXXX.gguf"
+        with open(part_name, "wb") as pf:
+            pf.write(part_data)
+        parts.append(part_name)
+        offset = end
+        part_id += 1
+    num_parts = len(parts)
+    final_files = []
+    for i, old_name in enumerate(parts):
+        new_name = f"model-{i+1:05d}-of-{num_parts:05d}.gguf"
+        os.rename(old_name, new_name)
+        final_files.append(new_name)
+    index = {
+        "metadata": {
+            "total_size": total_size
+        },
+        "file_map": {
+            f"part_{i+1}": name for i, name in enumerate(final_files)
+        }
+    }
+    with open("model.gguf.index.json", "w") as f:
+        json.dump(index, f, indent=2)
+    print(f"\nSplit complete! {num_parts} parts created.")
+    print("Index file: model.gguf.index.json")
+def merge_gguf_files():
+    import os
+    gguf_files = [f for f in os.listdir('.') if f.endswith('.gguf')]
+    if not gguf_files:
+        print("No .gguf files found in the current directory.")
+        return
+    filename = input("Enter the output file name (without .gguf): ").strip()
+    if not filename:
+        filename = "model"
+    output_file = f"{filename}.gguf"
+    with open(output_file, 'wb') as outfile:
+        for fname in gguf_files:
+            print(f"Merging: {fname}")
+            with open(fname, 'rb') as infile:
+                outfile.write(infile.read())
+    print(f"\nAll files merged into: {output_file}")
 from tkinter import *
 def __init__():
     parser = argparse.ArgumentParser(description="gguf will execute different functions based on command-line arguments")
@@ -240,6 +326,8 @@ def __init__():
     subparsers.add_parser('a', help='model analyzor (beta)')
     subparsers.add_parser('r', help='GGUF metadata reader')
     subparsers.add_parser('s', help='sample GGUF list (download ready)')
+    subparsers.add_parser('split', help='split GGUF')
+    subparsers.add_parser('merge', help='merge GGUF')
     subparsers.add_parser('prompt', help='generate random prompt (beta)')
     subparsers.add_parser('comfy', help='download comfy pack with gguf-node')
     subparsers.add_parser('node', help='download gguf-node only')
@@ -288,6 +376,13 @@ def __init__():
             print(f"{num_descriptors} prompt(s) generated and saved in separate text file(s).")
         except ValueError:
             print("Invalid input. Please enter a valid number.")
+    elif args.subcommand == 'split':
+        file = list_gguf_files()
+        if file:
+            cutoff = get_cutoff_size()
+            split_gguf_file(file, cutoff)
+    elif args.subcommand == 'merge':
+        merge_gguf_files()
     elif args.subcommand == 'us':
         print("activating browser...")
         import webbrowser
