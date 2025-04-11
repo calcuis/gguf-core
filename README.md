@@ -60,6 +60,16 @@ You can either use the get feature above or opt a sample GGUF straight from the 
 ```
 gguf s
 ```
+#### gguf splitter
+Split gguf into part(s) by:
+```
+gguf split
+```
+#### gguf merger
+Merge all gguf into one by:
+```
+gguf merge
+```
 #### prompt generator (beta)
 Generate bulk prompt/descriptor(s) by:
 ```
